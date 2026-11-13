@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TintaKertas — Ubah Teks Jadi Tulisan Tangan Realistis Online</title>
+    
+    <!-- SEO Primary Meta Tags -->
+    <meta name="title" content="TintaKertas — Ubah Teks Jadi Tulisan Tangan Realistis Online">
+    <meta name="description" content="Aplikasi web gratis untuk mengubah teks menjadi tulisan tangan realistis di atas kertas. Mendukung unggah font sendiri (.ttf/.otf), latar kertas kustom, efek jitter organik, variasi tinta bolpoin, dan ekspor ke PNG resolusi tinggi.">
+    <meta name="keywords" content="text to handwriting, teks ke tulisan tangan, generator tulisan tangan, tulis tangan online, custom font handwriting, kertas bergaris online, tintakertas">
+    <meta name="author" content="TintaKertas">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#2563eb">
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="TintaKertas — Ubah Teks Jadi Tulisan Tangan Realistis Online">
+    <meta property="og:description" content="Ubah ketikan menjadi catatan tulisan tangan natural lengkap dengan variasi kepekatan bolpoin, kemiringan baris melorot, upload font sendiri, dan background kertas kustom.">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TintaKertas — Ubah Teks Jadi Tulisan Tangan Realistis">
+    <meta name="twitter:description" content="Ubah teks menjadi tulisan tangan realistis dengan font kustom, latar kertas sendiri, dan efek tinta bolpoin organik langsung dari browser.">
+
+    <!-- Favicon Inline SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><path d='M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z'/></svg>">
+
+    <!-- Structured Data (JSON-LD) untuk SEO Mesin Pencari -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TintaKertas",
+      "description": "Generator teks ke tulisan tangan realistis berbasis web dengan dukungan font kustom, latar belakang kertas sendiri, dan pengaturan tata letak presisi.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "inLanguage": "id",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "IDR"
+      }
+    }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2canvas untuk ekspor gambar berkualitas tinggi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Fonts: UI (Inter) & Koleksi Font Tulisan Tangan -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@400;600;700&family=Dancing+Script:wght@500;700&family=Homemade+Apple&family=Indie+Flower&family=Inter:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Patrick+Hand&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Range Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #e2e8f0;
+            height: 0.375rem;
+            border-radius: 9999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #2563eb;
+            height: 1rem;
+            width: 1rem;
+            border-radius: 9999px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Efek Kertas & Tekstur */
+        .paper-shadow {
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.08),
+                0 10px 25px -5px rgba(15, 23, 42, 0.12),
+                0 20px 40px -10px rgba(15, 23, 42, 0.08);
+        }
+
+        /* Lapisan Tekstur Kertas (Bayangan tepi & lipatan halus) */
+        .paper-overlay-effect {
+            background: linear-gradient(90deg, rgba(0,0,0,0.03) 0%, rgba(255,255,255,0) 4%, rgba(255,255,255,0) 97%, rgba(0,0,0,0.02) 100%);
+            pointer-events: none;
+        }
+
+        /* Preset: Kertas Polos */
+        .paper-plain {
+            background-color: #ffffff;
+        }
+
+        /* Preset: Kertas Bergaris Buku Tulis (Dinamis mengikuti line-height via CSS variable) */
+        .paper-ruled {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(90deg, transparent calc(var(--margin-left, 56px) - 10px), #fca5a5 calc(var(--margin-left, 56px) - 10px), #fca5a5 calc(var(--margin-left, 56px) - 8px), transparent calc(var(--margin-left, 56px) - 8px)),
+                repeating-linear-gradient(
+                    to bottom,
+                    transparent 0px,
+                    transparent calc(var(--line-step, 32px) - 1px),
+                    #cbd5e1 calc(var(--line-step, 32px) - 1px),
+                    #cbd5e1 var(--line-step, 32px)
+                );
+            background-position: 0 0, 0 var(--line-offset, 52px);
+        }
+
+        /* Preset: Kertas Kotak-kotak (Grid) */
+        .paper-grid {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Preset: Kertas Titik-titik (Dotted) */
+        .paper-dotted {
+            background-color: #ffffff;
+            background-image: radial-gradient(#94a3b8 1.15px, transparent 1.15px);
+            background-size: 20px 20px;
+        }
+
+        /* Preset: Kertas Vintage / Krem */
+        .paper-vintage {
+            background-color: #f6eedc;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(217, 193, 152, 0.25) 0%, transparent 60%),
+                radial-gradient(circle at 80% 75%, rgba(196, 169, 124, 0.22) 0%, transparent 55%),
+                repeating-linear-gradient(
+                    to bottom,
+                    transparent 0px,
+                    transparent calc(var(--line-step, 32px) - 1px),
+                    rgba(168, 144, 108, 0.35) calc(var(--line-step, 32px) - 1px),
+                    rgba(168, 144, 108, 0.35) var(--line-step, 32px)
+                );
+            background-position: 0 0, 0 0, 0 var(--line-offset, 52px);
+        }
+
+        /* Aturan Cetak (Print) */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #paper-canvas-wrapper, #paper-canvas-wrapper * {
+                visibility: visible;
+            }
+            body {
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #preview-viewport {
+                overflow: visible !important;
+                padding: 0 !important;
+                background: white !important;
+                display: block !important;
+            }
+            #paper-scale-container {
+                transform: none !important;
+                margin: 0 !important;
+            }
+            #paper-sheet {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+                min-height: 100vh !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Aplikasi -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight tracking-tight">TintaKertas</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Generator Teks ke Tulisan Tangan Realistis</p>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi Ekspor -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="btn-reset" type="button" class="px-3 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5" title="Kembalikan pengaturan awal">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <span class="hidden md:inline">Reset</span>
+                </button>
+
+                <button id="btn-print" type="button" class="px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                    </svg>
+                    <span>Cetak</span>
+                </button>
+
+                <button id="btn-download" type="button" class="px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl transition flex items-center gap-2 shadow-sm shadow-blue-600/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    <span>Download PNG</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Kontainer Utama (Split View: Panel Kontrol Kiri & Pratinjau Kertas Kanan) -->
+    <main class="max-w-[1600px] mx-auto flex flex-col lg:flex-row lg:h-[calc(100vh-4rem)]">
+        
+        <!-- PANEL KIRI: KONTROL & EDITOR -->
+        <aside class="w-full lg:w-[430px] xl:w-[460px] bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col lg:h-full shrink-0 z-20">
+            
+            <!-- Navigasi Tab -->
+            <div class="grid grid-cols-4 border-b border-slate-200 bg-slate-50/70 p-1.5 gap-1">
+                <button type="button" data-tab="tab-teks" class="tab-btn active flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold bg-white text-blue-600 shadow-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" /></svg>
+                    <span>Teks</span>
+                </button>
+                <button type="button" data-tab="tab-font" class="tab-btn flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+                    <span>Font & Tinta</span>
+                </button>
+                <button type="button" data-tab="tab-kertas" class="tab-btn flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                    <span>Kertas</span>
+                </button>
+                <button type="button" data-tab="tab-layout" class="tab-btn flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-white/60 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+                    <span>Layout</span>
+                </button>
+            </div>
+
+            <!-- Konten Tab (Scrollable) -->
+            <div class="p-5 overflow-y-auto flex-1 space-y-6">
+                
+                <!-- TAB 1: EDITOR TEKS -->
+                <section id="tab-teks" class="tab-content space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label for="input-text" class="text-sm font-semibold text-slate-800">Isi Catatan / Tulisan</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btn-sample-text" class="text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition">
+                                Isi Contoh
+                            </button>
+                            <button type="button" id="btn-clear-text" class="text-xs font-medium text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 px-2.5 py-1 rounded-lg transition">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea id="input-text" rows="12" placeholder="Ketik atau tempel (paste) teks Anda di sini untuk diubah menjadi tulisan tangan..." class="w-full rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white p-3.5 text-sm text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition resize-y">Catatan Kuliah — Pengantar Kecerdasan Buatan
+Jumat, 13 November 2026
+
+Hari ini kita mempelajari bagaimana algoritma pembelajaran mesin (Machine Learning) mengenali pola dari data tidak terstruktur.
+
+Poin Penting:
+1. Supervised Learning membutuhkan data berlabel untuk melatih model prediksi.
+2. Unsupervised Learning mencari struktur tersembunyi atau klaster secara mandiri.
+3. Kualitas data jauh lebih menentukan akurasi dibanding sekadar kompleksitas arsitektur model.
+
+"Menulis dengan tangan membantu otak memproses dan mengingat informasi jauh lebih dalam dibandingkan sekadar mengetik."</textarea>
+
+                    <div class="flex items-center justify-between text-xs text-slate-500 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-200/70">
+                        <span>Jumlah Karakter: <strong id="char-count" class="text-slate-700">0</strong></span>
+                        <span>Jumlah Kata: <strong id="word-count" class="text-slate-700">0</strong></span>
+                    </div>
+
+                    <!-- Efek Realistis Tulisan Tangan -->
+                    <div class="pt-2 border-t border-slate-100 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-800">Efek Alami & Aliran Bolpoin</h3>
+                                <p class="text-xs text-slate-500">Variasi ketidakrapian, melorot & tinta acak</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="btn-reroll-jitter" class="text-[11px] font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-lg transition flex items-center gap-1" title="Acak ulang pola ketidakrapian dan kepekatan tinta">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" /></svg>
+                                    <span>Acak Ulang</span>
+                                </button>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="toggle-natural" class="sr-only peer" checked>
+                                    <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="natural-intensity-box" class="space-y-3 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/70">
+                            <!-- Preset Gaya Kerapian -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-slate-700">Preset Gaya Tulisan Tangan</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="jitter-presets-container">
+                                    <button type="button" data-preset="rapi" class="jitter-preset-btn px-2 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">Rapi Pelajar</button>
+                                    <button type="button" data-preset="normal" class="jitter-preset-btn active px-2 py-1.5 text-[11px] font-semibold rounded-lg border border-blue-600 bg-blue-50 text-blue-700 transition">Normal Santai</button>
+                                    <button type="button" data-preset="ngebut" class="jitter-preset-btn px-2 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">Ngebut / Buru-buru</button>
+                                    <button type="button" data-preset="melorot" class="jitter-preset-btn px-2 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">Miring Melorot</button>
+                                    <button type="button" data-preset="berantakan" class="jitter-preset-btn col-span-2 sm:col-span-2 px-2 py-1.5 text-[11px] font-medium rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">Berantakan Bebas (Tembus Garis)</button>
+                                </div>
+                            </div>
+
+                            <!-- 1. Tingkat Ketidakrapian Utama -->
+                            <div class="space-y-1 pt-2 border-t border-slate-200/60">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">Ketidakrapian Huruf (Skew, Rotasi & Skala)</span>
+                                    <span id="val-jitter" class="font-semibold text-blue-600">60%</span>
+                                </div>
+                                <input type="range" id="range-jitter" min="0" max="100" value="60" class="w-full">
+                                <p class="text-[10px] text-slate-400">Mengacak kemiringan condong huruf (skew), ukuran, dempet/renggang & gelombang kata.</p>
+                            </div>
+
+                            <!-- 2. Kemiringan Baris ke Bawah / Melorot -->
+                            <div class="space-y-1 pt-2 border-t border-slate-200/60">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">Kemiringan Baris (Menanjak / Melorot)</span>
+                                    <span id="val-line-slant" class="font-semibold text-blue-600">+15% (Melorot)</span>
+                                </div>
+                                <input type="range" id="range-line-slant" min="-100" max="100" value="15" class="w-full">
+                                <p class="text-[10px] text-slate-400">Nilai positif membuat baris makin turun melorot ke kanan hingga menembus garis.</p>
+                            </div>
+
+                            <!-- 3. Melampaui Batas Garis & Margin -->
+                            <div class="space-y-1 pt-2 border-t border-slate-200/60">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">Tembus Batas Garis & Margin Kanan</span>
+                                    <span id="val-line-overflow" class="font-semibold text-blue-600">40%</span>
+                                </div>
+                                <input type="range" id="range-line-overflow" min="0" max="100" value="40" class="w-full">
+                                <p class="text-[10px] text-slate-400">Huruf naik-turun melampaui garis buku dan ujung kata bisa melewati batas margin kanan.</p>
+                            </div>
+
+                            <!-- 4. Variasi Kepekatan Tinta Bolpoin -->
+                            <div class="space-y-1 pt-2 border-t border-slate-200/60">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-700 font-medium">Variasi Kepekatan Tinta Bolpoin</span>
+                                    <span id="val-ink-variation" class="font-semibold text-blue-600">65%</span>
+                                </div>
+                                <input type="range" id="range-ink-variation" min="0" max="100" value="65" class="w-full">
+                                <p class="text-[10px] text-slate-400">Tinta bolpoin kadang pekat tebal (bleed halus) dan kadang agak tipis tersendat acak.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: FONT & TINTA -->
+                <section id="tab-font" class="tab-content hidden space-y-5">
+                    <!-- Pilih Font -->
+                    <div class="space-y-2">
+                        <label for="select-font" class="block text-sm font-semibold text-slate-800">Gaya Tulisan (Font)</label>
+                        <select id="select-font" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500">
+                            <optgroup label="Koleksi Tulisan Tangan Bawaan" id="builtin-fonts-group">
+                                <option value="'Caveat', cursive" selected>Caveat (Santai & Rapi)</option>
+                                <option value="'Kalam', cursive">Kalam (Pulpen Harian Natural)</option>
+                                <option value="'Patrick Hand', cursive">Patrick Hand (Tegak & Jelas)</option>
+                                <option value="'Indie Flower', cursive">Indie Flower (Unik & Ringan)</option>
+                                <option value="'Shadows Into Light', cursive">Shadows Into Light (Ramping)</option>
+                                <option value="'Architects Daughter', cursive">Architects Daughter (Catatan Teknik)</option>
+                                <option value="'Dancing Script', cursive">Dancing Script (Sambung / Kaligrafi)</option>
+                                <option value="'Homemade Apple', cursive">Homemade Apple (Tulis Tangan Klasik)</option>
+                            </optgroup>
+                            <optgroup label="Font Kustom Anda" id="custom-fonts-group" class="hidden">
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Upload Font Sendiri -->
+                    <div class="p-4 rounded-xl border border-dashed border-blue-300 bg-blue-50/40 space-y-2.5">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-semibold text-slate-800">Unggah Font Tulisan Tangan Sendiri</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Mendukung format <strong>.ttf, .otf, .woff, .woff2</strong>. Langsung aktif setelah diunggah.</p>
+                            </div>
+                        </div>
+                        <label class="block w-full text-center py-2 px-3 bg-white hover:bg-blue-50 text-blue-600 font-medium text-xs border border-blue-200 rounded-lg cursor-pointer transition shadow-xs">
+                            <span>+ Pilih File Font dari Perangkat</span>
+                            <input type="file" id="upload-font" accept=".ttf,.otf,.woff,.woff2" class="hidden">
+                        </label>
+                        <div id="uploaded-font-list" class="space-y-1"></div>
+                    </div>
+
+                    <!-- Warna Tinta -->
+                    <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                        <label class="block text-sm font-semibold text-slate-800">Warna Tinta Pulpen</label>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <button type="button" data-color="#1e3a8a" class="ink-swatch w-8 h-8 rounded-full bg-[#1e3a8a] ring-2 ring-offset-2 ring-blue-600 transition transform hover:scale-110" title="Biru Pulpen Standar"></button>
+                            <button type="button" data-color="#18181b" class="ink-swatch w-8 h-8 rounded-full bg-[#18181b] ring-offset-2 hover:ring-2 ring-slate-400 transition transform hover:scale-110" title="Hitam Pekat"></button>
+                            <button type="button" data-color="#2563eb" class="ink-swatch w-8 h-8 rounded-full bg-[#2563eb] ring-offset-2 hover:ring-2 ring-slate-400 transition transform hover:scale-110" title="Biru Gel Terang"></button>
+                            <button type="button" data-color="#b91c1c" class="ink-swatch w-8 h-8 rounded-full bg-[#b91c1c] ring-offset-2 hover:ring-2 ring-slate-400 transition transform hover:scale-110" title="Merah Koreksi"></button>
+                            <button type="button" data-color="#15803d" class="ink-swatch w-8 h-8 rounded-full bg-[#15803d] ring-offset-2 hover:ring-2 ring-slate-400 transition transform hover:scale-110" title="Hijau Tinta"></button>
+                            <button type="button" data-color="#581c87" class="ink-swatch w-8 h-8 rounded-full bg-[#581c87] ring-offset-2 hover:ring-2 ring-slate-400 transition transform hover:scale-110" title="Ungu Gel"></button>
+                            
+                            <!-- Custom Color Picker -->
+                            <label class="relative w-8 h-8 rounded-full overflow-hidden border border-slate-300 cursor-pointer flex items-center justify-center bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-500 hover:scale-110 transition" title="Pilih Warna Kustom">
+                                <input type="color" id="input-ink-color" value="#1e3a8a" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ketebalan & Opasitas Tinta -->
+                    <div class="space-y-4 pt-2 border-t border-slate-100">
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="font-medium text-slate-700">Ketebalan Tinta (Font Weight)</span>
+                                <span id="val-weight" class="font-semibold text-blue-600">Normal (400)</span>
+                            </div>
+                            <input type="range" id="range-weight" min="300" max="700" step="100" value="400" class="w-full">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs">
+                                <span class="font-medium text-slate-700">Kepekatan Tinta (Opacity)</span>
+                                <span id="val-opacity" class="font-semibold text-blue-600">92%</span>
+                            </div>
+                            <input type="range" id="range-opacity" min="50" max="100" value="92" class="w-full">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: KERTAS & BACKGROUND -->
+                <section id="tab-kertas" class="tab-content hidden space-y-5">
+                    <!-- Preset Kertas -->
+                    <div class="space-y-2.5">
+                        <label class="block text-sm font-semibold text-slate-800">Jenis Kertas Bawaan</label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <button type="button" data-paper="paper-ruled" class="paper-preset-btn active flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/40 text-left transition">
+                                <div class="w-8 h-8 rounded-lg border border-slate-300 bg-white shrink-0 relative overflow-hidden">
+                                    <div class="absolute left-2 top-0 bottom-0 w-[1px] bg-red-400"></div>
+                                    <div class="w-full h-full" style="background: repeating-linear-gradient(transparent 0px, transparent 5px, #cbd5e1 6px);"></div>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-800">Bergaris</div>
+                                    <div class="text-[10px] text-slate-500">Buku Tulis</div>
+                                </div>
+                            </button>
+
+                            <button type="button" data-paper="paper-plain" class="paper-preset-btn flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition">
+                                <div class="w-8 h-8 rounded-lg border border-slate-300 bg-white shrink-0"></div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-800">Polos Putih</div>
+                                    <div class="text-[10px] text-slate-500">HVS Bersih</div>
+                                </div>
+                            </button>
+
+                            <button type="button" data-paper="paper-grid" class="paper-preset-btn flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition">
+                                <div class="w-8 h-8 rounded-lg border border-slate-300 bg-white shrink-0" style="background-image: linear-gradient(to right, #cbd5e1 1px, transparent 1px), linear-gradient(to bottom, #cbd5e1 1px, transparent 1px); background-size: 6px 6px;"></div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-800">Kotak-kotak</div>
+                                    <div class="text-[10px] text-slate-500">Grid / Grafik</div>
+                                </div>
+                            </button>
+
+                            <button type="button" data-paper="paper-dotted" class="paper-preset-btn flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition">
+                                <div class="w-8 h-8 rounded-lg border border-slate-300 bg-white shrink-0" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 6px 6px;"></div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-800">Titik-titik</div>
+                                    <div class="text-[10px] text-slate-500">Bullet Journal</div>
+                                </div>
+                            </button>
+
+                            <button type="button" data-paper="paper-vintage" class="paper-preset-btn col-span-2 flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-left transition">
+                                <div class="w-8 h-8 rounded-lg border border-amber-300 bg-[#f6eedc] shrink-0" style="background-image: repeating-linear-gradient(transparent 0px, transparent 5px, rgba(168,144,108,0.4) 6px);"></div>
+                                <div>
+                                    <div class="text-xs font-semibold text-slate-800">Kertas Vintage / Krem Klasik</div>
+                                    <div class="text-[10px] text-slate-500">Nuansa kertas lawas hangat bergaris halus</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upload Paper Background Sendiri -->
+                    <div class="p-4 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/40 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-semibold text-slate-800">Unggah Latar Kertas Sendiri</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Gunakan foto kertas folio, kop surat, atau tekstur kertas Anda sendiri (<strong>JPG, PNG, WEBP</strong>).</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <label class="flex-1 text-center py-2 px-3 bg-white hover:bg-emerald-50 text-emerald-700 font-medium text-xs border border-emerald-200 rounded-lg cursor-pointer transition shadow-xs">
+                                <span>+ Unggah Gambar Kertas</span>
+                                <input type="file" id="upload-paper" accept="image/png,image/jpeg,image/webp" class="hidden">
+                            </label>
+                            <button type="button" id="btn-remove-custom-paper" class="hidden px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg border border-red-200 transition" title="Hapus gambar latar kustom">
+                                Hapus
+                            </button>
+                        </div>
+
+                        <!-- Opsi Penyesuaian Background Gambar -->
+                        <div id="custom-paper-options" class="hidden pt-2 border-t border-emerald-200/70 space-y-2">
+                            <label class="block text-xs font-medium text-slate-700">Mode Penyesuaian Gambar:</label>
+                            <select id="select-bg-mode" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800">
+                                <option value="cover">Penuhi Kertas (Cover / Crop Proporsional)</option>
+                                <option value="stretch">Regangkan Penuh (100% Width & Height)</option>
+                                <option value="contain">Tampilkan Utuh (Contain)</option>
+                                <option value="repeat">Ulangi Pola (Repeat / Tile)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ukuran & Rasio Halaman -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <label for="select-page-size" class="block text-sm font-semibold text-slate-800">Ukuran & Rasio Halaman</label>
+                        <select id="select-page-size" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500">
+                            <option value="a4" selected>A4 Standar (210 × 297 mm)</option>
+                            <option value="letter">US Letter / Kuarto (8.5 × 11 in)</option>
+                            <option value="f4">F4 / Folio Indonesia (215 × 330 mm)</option>
+                            <option value="square">Persegi / Instagram Post (1:1)</option>
+                        </select>
+                    </div>
+
+                    <!-- Efek Bayangan & Pencahayaan Kertas -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-800">Efek Pencahayaan & Bayangan</h4>
+                            <p class="text-xs text-slate-500">Memberi kesan kertas fisik saat difoto</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-paper-lighting" class="sr-only peer" checked>
+                            <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- TAB 4: LAYOUT & SPASI -->
+                <section id="tab-layout" class="tab-content hidden space-y-5">
+                    
+                    <!-- Tipografi & Spasi -->
+                    <div class="space-y-3.5">
+                        <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-1.5">Ukuran & Kerapatan Tulisan</h3>
+                        
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-600">Ukuran Font (Font Size)</span>
+                                <span id="val-font-size" class="font-semibold text-blue-600">22px</span>
+                            </div>
+                            <input type="range" id="range-font-size" min="12" max="48" value="22" class="w-full">
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-600">Tinggi Baris (Line Height)</span>
+                                <span id="val-line-height" class="font-semibold text-blue-600">32px</span>
+                            </div>
+                            <input type="range" id="range-line-height" min="18" max="64" value="32" class="w-full">
+                            <p class="text-[10px] text-slate-400">Sesuaikan tinggi baris agar tulisan pas duduk di atas garis kertas.</p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-600">Posisi Vertikal Awal Teks (Offset Garis)</span>
+                                <span id="val-line-offset" class="font-semibold text-blue-600">0px</span>
+                            </div>
+                            <input type="range" id="range-line-offset" min="-20" max="20" value="0" class="w-full">
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-600">Jarak Antar Huruf (Letter Spacing)</span>
+                                <span id="val-letter-spacing" class="font-semibold text-blue-600">0.5px</span>
+                            </div>
+                            <input type="range" id="range-letter-spacing" min="-2" max="8" step="0.5" value="0.5" class="w-full">
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-600">Jarak Antar Kata (Word Spacing)</span>
+                                <span id="val-word-spacing" class="font-semibold text-blue-600">2px</span>
+                            </div>
+                            <input type="range" id="range-word-spacing" min="-4" max="20" step="1" value="2" class="w-full">
+                        </div>
+                    </div>
+
+                    <!-- Margin Kertas -->
+                    <div class="space-y-3.5 pt-2">
+                        <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-1.5">Margin Kertas (Batas Tepi)</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-600">Atas</span>
+                                    <span id="val-margin-top" class="font-semibold text-blue-600">52px</span>
+                                </div>
+                                <input type="range" id="range-margin-top" min="16" max="140" value="52" class="w-full">
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-600">Bawah</span>
+                                    <span id="val-margin-bottom" class="font-semibold text-blue-600">48px</span>
+                                </div>
+                                <input type="range" id="range-margin-bottom" min="16" max="140" value="48" class="w-full">
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-600">Kiri</span>
+                                    <span id="val-margin-left" class="font-semibold text-blue-600">60px</span>
+                                </div>
+                                <input type="range" id="range-margin-left" min="16" max="140" value="60" class="w-full">
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-600">Kanan</span>
+                                    <span id="val-margin-right" class="font-semibold text-blue-600">44px</span>
+                                </div>
+                                <input type="range" id="range-margin-right" min="16" max="140" value="44" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perataan Teks -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-semibold text-slate-700">Perataan Paragraf</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" data-align="left" class="align-btn active py-2 px-3 rounded-lg border border-blue-600 bg-blue-50 text-blue-700 text-xs font-semibold transition">Rata Kiri</button>
+                            <button type="button" data-align="center" class="align-btn py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-medium transition">Tengah</button>
+                            <button type="button" data-align="justify" class="align-btn py-2 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-medium transition">Rata Kanan-Kiri</button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </aside>
+
+        <!-- PANEL KANAN: LIVE PREVIEW KERTAS -->
+        <section class="flex-1 flex flex-col bg-slate-200/75 relative overflow-hidden">
+            
+            <!-- Toolbar Pratinjau (Zoom & Info) -->
+            <div class="h-11 bg-white/80 backdrop-blur-xs border-b border-slate-200/80 px-4 flex items-center justify-between text-xs text-slate-600 shrink-0 z-10">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-medium">Pratinjau Langsung</span>
+                    <span id="page-dimension-badge" class="hidden sm:inline-block px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md font-mono text-[11px]">A4 • 794 × 1123 px</span>
+                </div>
+
+                <!-- Kontrol Zoom -->
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="btn-zoom-out" class="p-1.5 hover:bg-slate-200/70 rounded-lg transition" title="Perkecil Tampilan">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" /></svg>
+                    </button>
+                    <span id="zoom-level-text" class="font-semibold w-11 text-center text-slate-700">100%</span>
+                    <button type="button" id="btn-zoom-in" class="p-1.5 hover:bg-slate-200/70 rounded-lg transition" title="Perbesar Tampilan">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    </button>
+                    <button type="button" id="btn-zoom-fit" class="ml-1 px-2 py-1 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 rounded-md transition">
+                        Pas Layar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Area Kanvas Kertas (Scrollable) -->
+            <div id="preview-viewport" class="flex-1 overflow-auto p-4 sm:p-8 lg:p-10 flex justify-center items-start">
+                <div id="paper-scale-container" class="origin-top transition-transform duration-150 ease-out">
+                    
+                    <!-- ELEMEN KERTAS UTAMA YANG AKAN DIRENDER / DICETAK -->
+                    <div id="paper-canvas-wrapper">
+                        <div id="paper-sheet" class="paper-ruled paper-shadow relative overflow-hidden transition-colors duration-200" style="width: 794px; min-height: 1123px; --line-step: 32px; --line-offset: 52px; --margin-left: 60px;">
+                            
+                            <!-- Lapisan Efek Cahaya Kertas -->
+                            <div id="paper-lighting-layer" class="paper-overlay-effect absolute inset-0 z-10"></div>
+                            
+                            <!-- Area Konten Tulisan Tangan -->
+                            <div id="handwriting-output" class="relative z-0 break-words whitespace-pre-wrap overflow-visible" style="
+                                font-family: 'Caveat', cursive;
+                                font-size: 22px;
+                                line-height: 32px;
+                                letter-spacing: 0.5px;
+                                word-spacing: 2px;
+                                color: #1e3a8a;
+                                opacity: 0.92;
+                                font-weight: 400;
+                                padding-top: 52px;
+                                padding-bottom: 48px;
+                                padding-left: 60px;
+                                padding-right: 44px;
+                                text-align: left;
+                            "></div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script Utama Aplikasi -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ==========================================
+            // 1. STATE APLIKASI
+            // ==========================================
+            const defaultState = {
+                text: document.getElementById('input-text').value,
+                fontFamily: "'Caveat', cursive",
+                inkColor: "#1e3a8a",
+                fontWeight: 400,
+                inkOpacity: 0.92,
+                fontSize: 22,
+                lineHeight: 32,
+                lineOffset: 0,
+                letterSpacing: 0.5,
+                wordSpacing: 2,
+                marginTop: 52,
+                marginBottom: 48,
+                marginLeft: 60,
+                marginRight: 44,
+                textAlign: 'left',
+                paperClass: 'paper-ruled',
+                customPaperUrl: null,
+                customBgMode: 'cover',
+                pageSize: 'a4',
+                paperLighting: true,
+                naturalEffect: true,
+                jitterIntensity: 60,
+                lineSlant: 15,
+                lineOverflow: 40,
+                inkVariation: 65,
+                randomSeedOffset: 1,
+                zoom: 1
+            };
+
+            let state = { ...defaultState };
+            let customFontCounter = 0;
+
+            // Preset gaya ketidakrapian tulisan tangan
+            const jitterPresets = {
+                rapi: { jitterIntensity: 22, lineSlant: 0, lineOverflow: 10, inkVariation: 35, label: 'Rapi Pelajar' },
+                normal: { jitterIntensity: 60, lineSlant: 15, lineOverflow: 40, inkVariation: 65, label: 'Normal Santai' },
+                ngebut: { jitterIntensity: 85, lineSlant: 25, lineOverflow: 65, inkVariation: 80, label: 'Ngebut / Buru-buru' },
+                melorot: { jitterIntensity: 65, lineSlant: 78, lineOverflow: 85, inkVariation: 65, label: 'Miring Melorot' },
+                berantakan: { jitterIntensity: 100, lineSlant: 45, lineOverflow: 100, inkVariation: 90, label: 'Berantakan Bebas' }
+            };
+
+            // Referensi elemen DOM utama
+            const elPaperSheet = document.getElementById('paper-sheet');
+            const elOutput = document.getElementById('handwriting-output');
+            const elScaleContainer = document.getElementById('paper-scale-container');
+            const elPreviewViewport = document.getElementById('preview-viewport');
+
+            // ==========================================
+            // 2. FUNGSI NOTIFIKASI & UPDATE TAMPILAN
+            // ==========================================
+            function showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = {
+                    info: 'bg-slate-800 text-white border-slate-700',
+                    success: 'bg-emerald-600 text-white border-emerald-500',
+                    error: 'bg-red-600 text-white border-red-500'
+                };
+                toast.className = `px-4 py-2.5 rounded-xl text-xs font-medium shadow-lg border ${colors[type] || colors.info} transition-all duration-300 transform translate-y-2 opacity-0`;
+                toast.textContent = message;
+                container.appendChild(toast);
+
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-2', 'opacity-0');
+                });
+
+                setTimeout(() => {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            const pageDimensions = {
+                a4: { width: 794, height: 1123, label: 'A4 • 794 × 1123 px' },
+                letter: { width: 816, height: 1056, label: 'Letter • 816 × 1056 px' },
+                f4: { width: 812, height: 1247, label: 'F4 • 812 × 1247 px' },
+                square: { width: 900, height: 900, label: 'Persegi • 900 × 900 px' }
+            };
+
+            function applyLayoutStyles() {
+                const dim = pageDimensions[state.pageSize] || pageDimensions.a4;
+                elPaperSheet.style.width = `${dim.width}px`;
+                elPaperSheet.style.minHeight = `${dim.height}px`;
+                document.getElementById('page-dimension-badge').textContent = dim.label;
+
+                // Sinkronisasi variabel CSS garis buku dengan line-height & margin
+                elPaperSheet.style.setProperty('--line-step', `${state.lineHeight}px`);
+                elPaperSheet.style.setProperty('--line-offset', `${state.marginTop + state.lineOffset}px`);
+                elPaperSheet.style.setProperty('--margin-left', `${state.marginLeft}px`);
+
+                // Terapkan tipografi & margin ke area tulisan
+                elOutput.style.fontFamily = state.fontFamily;
+                elOutput.style.fontSize = `${state.fontSize}px`;
+                elOutput.style.lineHeight = `${state.lineHeight}px`;
+                elOutput.style.letterSpacing = `${state.letterSpacing}px`;
+                elOutput.style.wordSpacing = `${state.wordSpacing}px`;
+                elOutput.style.color = state.inkColor;
+                elOutput.style.opacity = state.inkOpacity;
+                elOutput.style.fontWeight = state.fontWeight;
+                elOutput.style.paddingTop = `${state.marginTop}px`;
+                elOutput.style.paddingBottom = `${state.marginBottom}px`;
+                elOutput.style.paddingLeft = `${state.marginLeft}px`;
+                elOutput.style.paddingRight = `${state.marginRight}px`;
+                elOutput.style.textAlign = state.textAlign;
+
+                // Efek pencahayaan kertas
+                document.getElementById('paper-lighting-layer').style.display = state.paperLighting ? 'block' : 'none';
+            }
+
+            function applyPaperBackground() {
+                elPaperSheet.classList.remove('paper-ruled', 'paper-plain', 'paper-grid', 'paper-dotted', 'paper-vintage');
+
+                if (state.customPaperUrl) {
+                    elPaperSheet.style.backgroundColor = '#ffffff';
+                    elPaperSheet.style.backgroundImage = `url("${state.customPaperUrl}")`;
+                    elPaperSheet.style.backgroundPosition = 'center top';
+
+                    if (state.customBgMode === 'cover') {
+                        elPaperSheet.style.backgroundSize = 'cover';
+                        elPaperSheet.style.backgroundRepeat = 'no-repeat';
+                    } else if (state.customBgMode === 'stretch') {
+                        elPaperSheet.style.backgroundSize = '100% 100%';
+                        elPaperSheet.style.backgroundRepeat = 'no-repeat';
+                    } else if (state.customBgMode === 'contain') {
+                        elPaperSheet.style.backgroundSize = 'contain';
+                        elPaperSheet.style.backgroundRepeat = 'no-repeat';
+                    } else if (state.customBgMode === 'repeat') {
+                        elPaperSheet.style.backgroundSize = 'auto';
+                        elPaperSheet.style.backgroundRepeat = 'repeat';
+                    }
+                } else {
+                    elPaperSheet.style.backgroundImage = '';
+                    elPaperSheet.style.backgroundSize = '';
+                    elPaperSheet.style.backgroundRepeat = '';
+                    elPaperSheet.style.backgroundPosition = '';
+                    elPaperSheet.style.backgroundColor = '';
+                    elPaperSheet.classList.add(state.paperClass);
+                }
+            }
+
+            // ==========================================
+            // 3. RENDER TULISAN TANGAN (TERMASUK EFEK NATURAL)
+            // ==========================================
+            function seededRandom(seed) {
+                const x = Math.sin((seed + state.randomSeedOffset * 137.5) * 9999.91) * 10000;
+                return x - Math.floor(x);
+            }
+
+            function renderHandwritingText() {
+                const text = state.text;
+                
+                // Update statistik teks
+                document.getElementById('char-count').textContent = text.length;
+                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                document.getElementById('word-count').textContent = words;
+
+                if (!state.naturalEffect || (state.jitterIntensity === 0 && state.lineSlant === 0 && state.lineOverflow === 0 && state.inkVariation === 0)) {
+                    elOutput.textContent = text;
+                    return;
+                }
+
+                const jitterLvl = state.jitterIntensity / 100;
+                const slantLvl = state.lineSlant / 100;
+                const overflowLvl = state.lineOverflow / 100;
+                const inkVarLvl = state.inkVariation / 100;
+
+                const lines = text.split('\n');
+                const fragment = document.createDocumentFragment();
+                const isScriptFont = /Dancing Script|Homemade Apple/i.test(state.fontFamily);
+
+                lines.forEach((line, lineIdx) => {
+                    const lineDiv = document.createElement('div');
+                    lineDiv.style.position = 'relative';
+                    lineDiv.style.overflow = 'visible';
+                    lineDiv.style.minHeight = `${state.lineHeight}px`;
+
+                    const randomLineJitter = (seededRandom(lineIdx * 17 + 3) - 0.5) * 2.2 * jitterLvl;
+                    const baseLineSlopeDeg = slantLvl * 3.8 + randomLineJitter;
+                    const lineDropY = slantLvl * 6.0 * (0.6 + seededRandom(lineIdx * 43 + 5) * 0.8);
+                    const lineStartShiftX = (seededRandom(lineIdx * 31 + 9) - 0.5) * (6.0 * jitterLvl + 10.0 * overflowLvl);
+
+                    lineDiv.style.transform = `translate(${lineStartShiftX.toFixed(2)}px, ${lineDropY.toFixed(2)}px) rotate(${baseLineSlopeDeg.toFixed(3)}deg)`;
+                    lineDiv.style.transformOrigin = 'left center';
+
+                    if (line.trim() === '') {
+                        lineDiv.innerHTML = '&nbsp;';
+                    } else {
+                        const tokens = line.split(/(\s+)/);
+                        const totalTokens = tokens.length;
+                        let charGlobalIndex = lineIdx * 500;
+
+                        const lineWaveFreq = 0.25 + seededRandom(lineIdx * 59 + 1) * 0.45;
+                        const lineWavePhase = seededRandom(lineIdx * 61 + 2) * Math.PI * 2;
+
+                        tokens.forEach((token, tokenIdx) => {
+                            const progressInLine = totalTokens > 1 ? tokenIdx / (totalTokens - 1) : 0;
+
+                            if (/^\s+$/.test(token)) {
+                                const spaceSpan = document.createElement('span');
+                                spaceSpan.textContent = token;
+                                const spRand = seededRandom(charGlobalIndex + tokenIdx * 13);
+                                const extraSpace = (spRand - 0.42) * 8.5 * jitterLvl;
+                                spaceSpan.style.letterSpacing = `${extraSpace.toFixed(2)}px`;
+                                lineDiv.appendChild(spaceSpan);
+                            } else if (token.length > 0) {
+                                const wordSpan = document.createElement('span');
+                                wordSpan.style.display = 'inline-block';
+
+                                const wordSeed = (lineIdx + 1) * 193 + tokenIdx * 29;
+                                const wRand1 = seededRandom(wordSeed);
+                                const wRand2 = seededRandom(wordSeed + 11);
+                                const wRand3 = seededRandom(wordSeed + 23);
+                                const wRand4 = seededRandom(wordSeed + 37);
+
+                                const progressiveDroopY = Math.pow(progressInLine, 1.35) * slantLvl * (state.lineHeight * 0.65);
+                                const waveDriftY = Math.sin(tokenIdx * lineWaveFreq + lineWavePhase) * (4.5 * jitterLvl + 7.5 * overflowLvl);
+                                const randomWordJumpY = (wRand2 - 0.5) * (5.0 * jitterLvl + 11.0 * overflowLvl);
+                                const wordY = progressiveDroopY + waveDriftY + randomWordJumpY;
+
+                                const rightOverflowPushX = progressInLine > 0.72
+                                    ? (wRand3 - 0.25) * 24.0 * overflowLvl
+                                    : (wRand3 - 0.5) * 3.5 * jitterLvl;
+
+                                const wordRot = (wRand1 - 0.5) * (5.5 * jitterLvl + 3.0 * overflowLvl);
+                                const wordSkewX = (wRand4 - 0.5) * 11.0 * jitterLvl;
+                                const wordInkBase = 1 - (seededRandom(wordSeed + 41) * 0.28 * inkVarLvl);
+
+                                wordSpan.style.transform = `translate(${rightOverflowPushX.toFixed(2)}px, ${wordY.toFixed(2)}px) rotate(${wordRot.toFixed(2)}deg) skewX(${wordSkewX.toFixed(2)}deg)`;
+                                wordSpan.style.opacity = wordInkBase.toFixed(3);
+
+                                if (isScriptFont) {
+                                    wordSpan.textContent = token;
+                                } else {
+                                    for (let c = 0; c < token.length; c++) {
+                                        charGlobalIndex++;
+                                        const ch = token[c];
+                                        const charSpan = document.createElement('span');
+                                        charSpan.textContent = ch;
+                                        charSpan.style.display = 'inline-block';
+
+                                        const cSeed = charGlobalIndex * 37 + c * 7;
+                                        const rY = seededRandom(cSeed + 1);
+                                        const rX = seededRandom(cSeed + 2);
+                                        const rRot = seededRandom(cSeed + 3);
+                                        const rScale = seededRandom(cSeed + 4);
+                                        const rInk = seededRandom(cSeed + 5);
+                                        const rSkew = seededRandom(cSeed + 6);
+
+                                        const isUpper = ch >= 'A' && ch <= 'Z';
+                                        const upperBoost = isUpper ? (rScale * 0.14 * jitterLvl) : 0;
+                                        const cScale = 1 + ((rScale - 0.48) * 0.18 * jitterLvl) + upperBoost;
+
+                                        const baselineAmplitude = 4.5 * jitterLvl + 8.5 * overflowLvl;
+                                        const cY = (rY - 0.46) * baselineAmplitude;
+
+                                        const irregularKerning = (rX - 0.52) * 2.4 * jitterLvl;
+                                        const cRot = (rRot - 0.5) * 11.5 * jitterLvl;
+                                        const cSkew = (rSkew - 0.5) * 14.0 * jitterLvl;
+
+                                        const strokeWave = Math.sin(c * 0.85 + wordSeed) * 0.5 + 0.5;
+                                        const inkDrop = (rInk * 0.72 + strokeWave * 0.28) * 0.48 * inkVarLvl;
+                                        const charOpacity = Math.max(0.46, Math.min(1, 1 - inkDrop));
+
+                                        charSpan.style.marginLeft = `${irregularKerning.toFixed(2)}px`;
+                                        charSpan.style.transform = `translateY(${cY.toFixed(2)}px) rotate(${cRot.toFixed(2)}deg) skewX(${cSkew.toFixed(2)}deg) scale(${cScale.toFixed(3)})`;
+                                        charSpan.style.opacity = charOpacity.toFixed(3);
+
+                                        if (charOpacity > 0.92 && inkVarLvl > 0.25) {
+                                            charSpan.style.textShadow = `0.35px 0.35px 0.5px currentColor`;
+                                        }
+
+                                        wordSpan.appendChild(charSpan);
+                                    }
+                                }
+
+                                lineDiv.appendChild(wordSpan);
+                            }
+                        });
+                    }
+                    fragment.appendChild(lineDiv);
+                });
+
+                elOutput.innerHTML = '';
+                elOutput.appendChild(fragment);
+            }
+
+            // ==========================================
+            // 4. EVENT LISTENERS NAVIGASI & KONTROL
+            // ==========================================
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-white', 'text-blue-600', 'shadow-sm', 'font-semibold');
+                        b.classList.add('text-slate-600', 'font-medium');
+                    });
+                    btn.classList.add('active', 'bg-white', 'text-blue-600', 'shadow-sm', 'font-semibold');
+                    btn.classList.remove('text-slate-600', 'font-medium');
+
+                    document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+
+            const inputText = document.getElementById('input-text');
+            inputText.addEventListener('input', (e) => {
+                state.text = e.target.value;
+                renderHandwritingText();
+            });
+
+            document.getElementById('btn-sample-text').addEventListener('click', () => {
+                state.text = defaultState.text;
+                inputText.value = state.text;
+                renderHandwritingText();
+                showToast('Teks contoh dimuat kembali', 'info');
+            });
+
+            document.getElementById('btn-clear-text').addEventListener('click', () => {
+                state.text = '';
+                inputText.value = '';
+                renderHandwritingText();
+                showToast('Teks dibersihkan', 'info');
+            });
+
+            document.getElementById('toggle-natural').addEventListener('change', (e) => {
+                state.naturalEffect = e.target.checked;
+                const box = document.getElementById('natural-intensity-box');
+                box.style.opacity = e.target.checked ? '1' : '0.4';
+                box.style.pointerEvents = e.target.checked ? 'auto' : 'none';
+                renderHandwritingText();
+            });
+
+            function formatSlantLabel(val) {
+                if (val === 0) return '0% (Datar)';
+                if (val > 0) return `+${val}% (Melorot)`;
+                return `${val}% (Menanjak)`;
+            }
+
+            function syncJitterControlsUI() {
+                document.getElementById('range-jitter').value = state.jitterIntensity;
+                document.getElementById('val-jitter').textContent = `${state.jitterIntensity}%`;
+
+                document.getElementById('range-line-slant').value = state.lineSlant;
+                document.getElementById('val-line-slant').textContent = formatSlantLabel(state.lineSlant);
+
+                document.getElementById('range-line-overflow').value = state.lineOverflow;
+                document.getElementById('val-line-overflow').textContent = `${state.lineOverflow}%`;
+
+                document.getElementById('range-ink-variation').value = state.inkVariation;
+                document.getElementById('val-ink-variation').textContent = `${state.inkVariation}%`;
+            }
+
+            function clearActiveJitterPreset() {
+                document.querySelectorAll('.jitter-preset-btn').forEach(b => {
+                    b.classList.remove('active', 'border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    b.classList.add('border-slate-200', 'bg-white', 'text-slate-600', 'font-medium');
+                });
+            }
+
+            document.querySelectorAll('.jitter-preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const presetKey = btn.getAttribute('data-preset');
+                    const preset = jitterPresets[presetKey];
+                    if (!preset) return;
+
+                    state.jitterIntensity = preset.jitterIntensity;
+                    state.lineSlant = preset.lineSlant;
+                    state.lineOverflow = preset.lineOverflow;
+                    state.inkVariation = preset.inkVariation;
+
+                    clearActiveJitterPreset();
+                    btn.classList.add('active', 'border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    btn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600', 'font-medium');
+
+                    syncJitterControlsUI();
+                    renderHandwritingText();
+                    showToast(`Gaya tulisan "${preset.label}" diterapkan`, 'info');
+                });
+            });
+
+            document.getElementById('range-jitter').addEventListener('input', (e) => {
+                state.jitterIntensity = parseInt(e.target.value, 10);
+                document.getElementById('val-jitter').textContent = `${state.jitterIntensity}%`;
+                clearActiveJitterPreset();
+                renderHandwritingText();
+            });
+
+            document.getElementById('range-line-slant').addEventListener('input', (e) => {
+                state.lineSlant = parseInt(e.target.value, 10);
+                document.getElementById('val-line-slant').textContent = formatSlantLabel(state.lineSlant);
+                clearActiveJitterPreset();
+                renderHandwritingText();
+            });
+
+            document.getElementById('range-line-overflow').addEventListener('input', (e) => {
+                state.lineOverflow = parseInt(e.target.value, 10);
+                document.getElementById('val-line-overflow').textContent = `${state.lineOverflow}%`;
+                clearActiveJitterPreset();
+                renderHandwritingText();
+            });
+
+            document.getElementById('range-ink-variation').addEventListener('input', (e) => {
+                state.inkVariation = parseInt(e.target.value, 10);
+                document.getElementById('val-ink-variation').textContent = `${state.inkVariation}%`;
+                clearActiveJitterPreset();
+                renderHandwritingText();
+            });
+
+            document.getElementById('btn-reroll-jitter').addEventListener('click', () => {
+                state.randomSeedOffset = Math.random() * 1000;
+                renderHandwritingText();
+                showToast('Pola ketidakrapian & aliran tinta bolpoin diacak ulang!', 'info');
+            });
+
+            // ==========================================
+            // 5. FONT BAWAAAN, UPLOAD FONT & WARNA TINTA
+            // ==========================================
+            const selectFont = document.getElementById('select-font');
+            selectFont.addEventListener('change', (e) => {
+                state.fontFamily = e.target.value;
+                applyLayoutStyles();
+                renderHandwritingText();
+            });
+
+            document.getElementById('upload-font').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    customFontCounter++;
+                    const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9\s-_]/g, '');
+                    const fontFamilyName = `CustomHandwriting_${customFontCounter}`;
+                    const fontFace = new FontFace(fontFamilyName, arrayBuffer);
+                    const loadedFace = await fontFace.load();
+                    document.fonts.add(loadedFace);
+
+                    const customGroup = document.getElementById('custom-fonts-group');
+                    customGroup.classList.remove('hidden');
+
+                    const option = document.createElement('option');
+                    option.value = `'${fontFamilyName}', cursive`;
+                    option.textContent = `${cleanName || 'Font Kustom'} (Unggahan)`;
+                    customGroup.appendChild(option);
+
+                    selectFont.value = option.value;
+                    state.fontFamily = option.value;
+                    applyLayoutStyles();
+                    renderHandwritingText();
+
+                    const listEl = document.getElementById('uploaded-font-list');
+                    const badge = document.createElement('div');
+                    badge.className = 'text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center justify-between';
+                    badge.innerHTML = `<span class="truncate font-medium">✓ ${file.name}</span><span class="text-[10px] uppercase">Aktif</span>`;
+                    listEl.appendChild(badge);
+
+                    showToast(`Font "${file.name}" berhasil dimuat!`, 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Gagal memuat file font. Pastikan format .ttf/.otf/.woff valid.', 'error');
+                }
+                e.target.value = '';
+            });
+
+            document.querySelectorAll('.ink-swatch').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const color = btn.getAttribute('data-color');
+                    state.inkColor = color;
+                    document.getElementById('input-ink-color').value = color;
+
+                    document.querySelectorAll('.ink-swatch').forEach(s => s.classList.remove('ring-2', 'ring-blue-600'));
+                    btn.classList.add('ring-2', 'ring-blue-600');
+                    applyLayoutStyles();
+                });
+            });
+
+            document.getElementById('input-ink-color').addEventListener('input', (e) => {
+                state.inkColor = e.target.value;
+                document.querySelectorAll('.ink-swatch').forEach(s => s.classList.remove('ring-2', 'ring-blue-600'));
+                applyLayoutStyles();
+            });
+
+            document.getElementById('range-weight').addEventListener('input', (e) => {
+                state.fontWeight = parseInt(e.target.value, 10);
+                const weightLabels = { 300: 'Tipis (300)', 400: 'Normal (400)', 500: 'Medium (500)', 600: 'Semi-Tebal (600)', 700: 'Tebal (700)' };
+                document.getElementById('val-weight').textContent = weightLabels[state.fontWeight] || state.fontWeight;
+                applyLayoutStyles();
+            });
+
+            document.getElementById('range-opacity').addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                state.inkOpacity = val / 100;
+                document.getElementById('val-opacity').textContent = `${val}%`;
+                applyLayoutStyles();
+            });
+
+            // ==========================================
+            // 6. KERTAS, BACKGROUND KUSTOM & UKURAN HALAMAN
+            // ==========================================
+            function selectPaperPreset(paperClass) {
+                state.paperClass = paperClass;
+                state.customPaperUrl = null;
+                document.getElementById('btn-remove-custom-paper').classList.add('hidden');
+                document.getElementById('custom-paper-options').classList.add('hidden');
+
+                document.querySelectorAll('.paper-preset-btn').forEach(btn => {
+                    if (btn.getAttribute('data-paper') === paperClass) {
+                        btn.classList.add('active', 'border-2', 'border-blue-600', 'bg-blue-50/40');
+                        btn.classList.remove('border', 'border-slate-200', 'bg-white');
+                    } else {
+                        btn.classList.remove('active', 'border-2', 'border-blue-600', 'bg-blue-50/40');
+                        btn.classList.add('border', 'border-slate-200', 'bg-white');
+                    }
+                });
+
+                applyPaperBackground();
+            }
+
+            document.querySelectorAll('.paper-preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectPaperPreset(btn.getAttribute('data-paper'));
+                });
+            });
+
+            document.getElementById('upload-paper').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    state.customPaperUrl = event.target.result;
+                    document.getElementById('btn-remove-custom-paper').classList.remove('hidden');
+                    document.getElementById('custom-paper-options').classList.remove('hidden');
+                    document.querySelectorAll('.paper-preset-btn').forEach(btn => {
+                        btn.classList.remove('active', 'border-2', 'border-blue-600', 'bg-blue-50/40');
+                        btn.classList.add('border', 'border-slate-200', 'bg-white');
+                    });
+                    applyPaperBackground();
+                    showToast('Latar kertas kustom diterapkan!', 'success');
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            });
+
+            document.getElementById('btn-remove-custom-paper').addEventListener('click', () => {
+                selectPaperPreset('paper-ruled');
+                showToast('Latar kertas kustom dihapus', 'info');
+            });
+
+            document.getElementById('select-bg-mode').addEventListener('change', (e) => {
+                state.customBgMode = e.target.value;
+                applyPaperBackground();
+            });
+
+            document.getElementById('select-page-size').addEventListener('change', (e) => {
+                state.pageSize = e.target.value;
+                applyLayoutStyles();
+                fitZoomToScreen();
+            });
+
+            document.getElementById('toggle-paper-lighting').addEventListener('change', (e) => {
+                state.paperLighting = e.target.checked;
+                applyLayoutStyles();
+            });
+
+            // ==========================================
+            // 7. LAYOUT, MARGIN & SPASI
+            // ==========================================
+            function bindRangeLayout(id, valId, stateKey, unit = 'px', rerenderText = false) {
+                document.getElementById(id).addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    state[stateKey] = val;
+                    document.getElementById(valId).textContent = `${val}${unit}`;
+                    applyLayoutStyles();
+                    if (rerenderText) renderHandwritingText();
+                });
+            }
+
+            bindRangeLayout('range-font-size', 'val-font-size', 'fontSize', 'px', false);
+            bindRangeLayout('range-line-height', 'val-line-height', 'lineHeight', 'px', true);
+            bindRangeLayout('range-line-offset', 'val-line-offset', 'lineOffset', 'px', false);
+            bindRangeLayout('range-letter-spacing', 'val-letter-spacing', 'letterSpacing', 'px', false);
+            bindRangeLayout('range-word-spacing', 'val-word-spacing', 'wordSpacing', 'px', false);
+            bindRangeLayout('range-margin-top', 'val-margin-top', 'marginTop', 'px', false);
+            bindRangeLayout('range-margin-bottom', 'val-margin-bottom', 'marginBottom', 'px', false);
+            bindRangeLayout('range-margin-left', 'val-margin-left', 'marginLeft', 'px', false);
+            bindRangeLayout('range-margin-right', 'val-margin-right', 'marginRight', 'px', false);
+
+            document.querySelectorAll('.align-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.textAlign = btn.getAttribute('data-align');
+                    document.querySelectorAll('.align-btn').forEach(b => {
+                        b.classList.remove('active', 'border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                        b.classList.add('border-slate-200', 'text-slate-600', 'font-medium');
+                    });
+                    btn.classList.add('active', 'border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    btn.classList.remove('border-slate-200', 'text-slate-600', 'font-medium');
+                    applyLayoutStyles();
+                });
+            });
+
+            // ==========================================
+            // 8. KONTROL ZOOM, RESET, CETAK & DOWNLOAD PNG
+            // ==========================================
+            function updateZoom(newZoom) {
+                state.zoom = Math.max(0.35, Math.min(1.6, newZoom));
+                elScaleContainer.style.transform = `scale(${state.zoom})`;
+                document.getElementById('zoom-level-text').textContent = `${Math.round(state.zoom * 100)}%`;
+            }
+
+            function fitZoomToScreen() {
+                const dim = pageDimensions[state.pageSize] || pageDimensions.a4;
+                const availableWidth = elPreviewViewport.clientWidth - 48;
+                if (availableWidth > 0 && availableWidth < dim.width) {
+                    updateZoom(availableWidth / dim.width);
+                } else {
+                    updateZoom(1);
+                }
+            }
+
+            document.getElementById('btn-zoom-in').addEventListener('click', () => updateZoom(state.zoom + 0.1));
+            document.getElementById('btn-zoom-out').addEventListener('click', () => updateZoom(state.zoom - 0.1));
+            document.getElementById('btn-zoom-fit').addEventListener('click', fitZoomToScreen);
+
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                state = { ...defaultState };
+                inputText.value = state.text;
+                selectFont.value = state.fontFamily;
+                document.getElementById('input-ink-color').value = state.inkColor;
+
+                document.getElementById('range-weight').value = state.fontWeight;
+                document.getElementById('val-weight').textContent = 'Normal (400)';
+                document.getElementById('range-opacity').value = 92;
+                document.getElementById('val-opacity').textContent = '92%';
+
+                document.getElementById('range-font-size').value = state.fontSize;
+                document.getElementById('val-font-size').textContent = `${state.fontSize}px`;
+                document.getElementById('range-line-height').value = state.lineHeight;
+                document.getElementById('val-line-height').textContent = `${state.lineHeight}px`;
+                document.getElementById('range-line-offset').value = state.lineOffset;
+                document.getElementById('val-line-offset').textContent = `${state.lineOffset}px`;
+                document.getElementById('range-letter-spacing').value = state.letterSpacing;
+                document.getElementById('val-letter-spacing').textContent = `${state.letterSpacing}px`;
+                document.getElementById('range-word-spacing').value = state.wordSpacing;
+                document.getElementById('val-word-spacing').textContent = `${state.wordSpacing}px`;
+
+                document.getElementById('range-margin-top').value = state.marginTop;
+                document.getElementById('val-margin-top').textContent = `${state.marginTop}px`;
+                document.getElementById('range-margin-bottom').value = state.marginBottom;
+                document.getElementById('val-margin-bottom').textContent = `${state.marginBottom}px`;
+                document.getElementById('range-margin-left').value = state.marginLeft;
+                document.getElementById('val-margin-left').textContent = `${state.marginLeft}px`;
+                document.getElementById('range-margin-right').value = state.marginRight;
+                document.getElementById('val-margin-right').textContent = `${state.marginRight}px`;
+
+                document.getElementById('toggle-natural').checked = true;
+                document.getElementById('natural-intensity-box').style.opacity = '1';
+                document.getElementById('natural-intensity-box').style.pointerEvents = 'auto';
+                syncJitterControlsUI();
+                clearActiveJitterPreset();
+                const defaultPresetBtn = document.querySelector('.jitter-preset-btn[data-preset="normal"]');
+                if (defaultPresetBtn) {
+                    defaultPresetBtn.classList.add('active', 'border-blue-600', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    defaultPresetBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600', 'font-medium');
+                }
+
+                document.getElementById('select-page-size').value = 'a4';
+                selectPaperPreset('paper-ruled');
+                applyLayoutStyles();
+                renderHandwritingText();
+                fitZoomToScreen();
+                showToast('Pengaturan dikembalikan ke standar awal', 'info');
+            });
+
+            document.getElementById('btn-print').addEventListener('click', () => {
+                window.print();
+            });
+
+            document.getElementById('btn-download').addEventListener('click', async () => {
+                const btnDownload = document.getElementById('btn-download');
+                const originalHTML = btnDownload.innerHTML;
+                btnDownload.disabled = true;
+                btnDownload.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg><span>Memproses...</span>`;
+
+                const prevTransform = elScaleContainer.style.transform;
+                elScaleContainer.style.transform = 'scale(1)';
+
+                try {
+                    await document.fonts.ready;
+                    const canvas = await html2canvas(elPaperSheet, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `TintaKertas-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                    showToast('Gambar tulisan tangan berhasil diunduh!', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('Gagal mengekspor gambar. Silakan coba lagi.', 'error');
+                } finally {
+                    elScaleContainer.style.transform = prevTransform;
+                    btnDownload.disabled = false;
+                    btnDownload.innerHTML = originalHTML;
+                }
+            });
+
+            // ==========================================
+            // 9. INISIALISASI AWAL
+            // ==========================================
+            window.addEventListener('resize', fitZoomToScreen);
+            applyLayoutStyles();
+            applyPaperBackground();
+            renderHandwritingText();
+            fitZoomToScreen();
+        });
+    </script>
+</body>
+</html>
