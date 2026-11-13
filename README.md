@@ -31,24 +31,48 @@
 ## 🚀 Cara Hosting di GitHub Pages (`username.github.io`)
 
 1. **Buat Repositori Baru** di GitHub (misalnya bernama `tintakertas` atau `USERNAME.github.io`).
-2. **Simpan Kedua File**:
-   - Simpan kode aplikasi utama sebagai **`index.html`** di folder *root* repositori Anda.
-   - Simpan file dokumentasi ini sebagai **`README.md`**.
-3. **Upload File ke Repositori**:
-   - Unggah `index.html` dan `README.md` melalui antarmuka web GitHub atau menggunakan Git CLI:
+2. **File Repositori**:
+   - `index.html` (Aplikasi utama + Konten SEO & FAQ)
+   - `robots.txt` (Instruksi crawler mesin pencari Google/Bing)
+   - `sitemap.xml` (Peta situs XML untuk indeks pencarian)
+   - `README.md` (Dokumentasi proyek)
+3. **Konfigurasi URL SEO (Opsional namun Disarankan)**:
+   - Buka `robots.txt` dan `sitemap.xml`, ganti `https://username.github.io/` dengan alamat repositori aktif Anda (misal `https://username.github.io/tintakertas/`).
+4. **Upload File ke Repositori**:
+   - Unggah semua file melalui antarmuka web GitHub atau Git CLI:
      ```bash
      git init
-     git add index.html README.md
-     git commit -m "Initial commit: TintaKertas Text to Handwriting"
+     git add index.html robots.txt sitemap.xml README.md
+     git commit -m "feat: TintaKertas generator dengan optimasi SEO & robots.txt"
      git branch -M main
      git remote add origin https://github.com/USERNAME/NAMA-REPO.git
      git push -u origin main
      ```
-4. **Aktifkan GitHub Pages**:
+5. **Aktifkan GitHub Pages**:
    - Buka tab **Settings** → **Pages** di repositori GitHub Anda.
    - Pada bagian **Build and deployment** → **Source**, pilih **Deploy from a branch**.
    - Pilih branch **`main`** dan folder **`/ (root)`**, lalu klik **Save**.
    - Tunggu 1–2 menit hingga situs Anda aktif di `https://USERNAME.github.io/NAMA-REPO/`.
+
+---
+
+## 🔍 Optimasi Mesin Pencari (SEO) & Kata Kunci
+
+Aplikasi ini telah dioptimalkan secara teknis dan semantik untuk meranking berbagai variasi kata kunci penelusuran (termasuk kata kunci tidak baku/panjang) di Google:
+- **Kata Kunci Utama & Variasi Long-Tail**:
+  - *"font tulistangan generator"*
+  - *"mengetik tulisan"*
+  - *"menulis dengan mengetik"*
+  - *"ngetik tulisan tangan"*
+  - *"bot nulis tangan"*
+  - *"ubah ketikan jadi tulisan tangan"*
+  - *"generator tulisan tangan di kertas bergaris"*
+  - *"salin ketikan ke buku tulis"*
+- **Teknis SEO yang Disertakan**:
+  - `robots.txt` ramah crawler dengan tautan ke `sitemap.xml`.
+  - `sitemap.xml` standar Schema.org / Sitemaps Protocol.
+  - JSON-LD Structured Data Schema (`WebApplication` & `FAQPage`) untuk mengaktifkan Rich Snippets di Google SERP.
+  - Bagian konten panduan & FAQ interaktif native HTML (`<details>`) di halaman utama tanpa memberatkan performa rendering.
 
 ---
 

@@ -1,0 +1,20 @@
+# ========================================================
+# robots.txt untuk TintaKertas (GitHub Pages / Web Hosting)
+# Mengizinkan semua robot mesin pencari (Googlebot, Bingbot, dll)
+# ========================================================
+
+User-agent: *
+Allow: /
+
+# Hindari pengindeksan file mentah sistem atau file konfigurasi tersembunyi
+Disallow: /.git/
+Disallow: /.github/
+
+# ========================================================
+# Peta Situs (Sitemap)
+# Catatan: Bila dihosting di GitHub Pages (username.github.io/repo),
+# sesuaikan domain di bawah ini dengan URL aktif Anda:
+# Contoh: Sitemap: https://username.github.io/nama-repo/sitemap.xml
+# ========================================================
+Sitemap: https://username.github.io/sitemap.xml
+
